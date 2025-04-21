@@ -26,6 +26,7 @@ public class Usuario {
 
     private LocalDate dataNascimento;
 
+    @Indexed(unique = true)
     private String email;
 
     @Indexed(unique = true)

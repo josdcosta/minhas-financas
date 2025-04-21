@@ -2,7 +2,6 @@ package br.com.dominio.minhasfinancas.service;
 
 import br.com.dominio.minhasfinancas.domain.Transacao;
 import br.com.dominio.minhasfinancas.exception.SalvarListaTransacaoException;
-import br.com.dominio.minhasfinancas.exception.TransacoesNaoEncontradasException;
 import br.com.dominio.minhasfinancas.repository.TransacaoRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -15,11 +14,11 @@ public class TransacaoService {
     @Autowired
     TransacaoRepository transacaoRepository;
 
-    public void salvarTodos(List<Transacao> transacaoList){
+    public void salvarTodos(List<Transacao> transacoes){
         try{
-            transacaoList = transacaoRepository.saveAll(transacaoList);
+            transacoes = transacaoRepository.saveAll(transacoes);
 
-            if(transacaoList.isEmpty()){
+            if(transacoes.isEmpty()){
                 throw new SalvarListaTransacaoException();
             }
         } catch (Exception e){

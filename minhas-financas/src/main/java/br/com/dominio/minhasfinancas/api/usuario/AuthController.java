@@ -46,9 +46,9 @@ public class AuthController {
         }
         usuario.setRoles(roles);
 
-        usuario = authService.criar(usuario);
+        Usuario usuarioSalvo = authService.criar(usuario);
 
-        return usuarioMapper.fromToCadastroResponse(usuario);
+        return usuarioMapper.fromToCadastroResponse(usuarioSalvo);
     }
 
     @PostMapping("/login")

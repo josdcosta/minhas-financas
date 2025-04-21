@@ -3,6 +3,8 @@ package br.com.dominio.minhasfinancas.service;
 import br.com.dominio.minhasfinancas.domain.CategoriaTransacao;
 import br.com.dominio.minhasfinancas.domain.Meta;
 import br.com.dominio.minhasfinancas.domain.Transacao;
+import br.com.dominio.minhasfinancas.exception.CategoriaNaoEncontradaException;
+import br.com.dominio.minhasfinancas.exception.DeleteMetaException;
 import br.com.dominio.minhasfinancas.exception.SalvarMetaException;
 import br.com.dominio.minhasfinancas.repository.CategoriaTransacaoRepository;
 import br.com.dominio.minhasfinancas.repository.MetaRepository;
@@ -25,30 +27,31 @@ public class MetaService {
     @Autowired
     TransacaoRepository transacaoRepository;
 
-    @Autowired
-    private CategoriaTransacaoRepository categoriaGastoRepository;
+    private void preencherCategoria(Meta meta) {
+        CategoriaTransacao categoriaTransacao = categoriaTransacaoRepository.findByDescricao(meta.getCategoriaTransacao());
+        if (categoriaTransacao == null) {
+            throw new CategoriaNaoEncontradaException();
+        }
+        meta.setIdCategoriaTransacao(categoriaTransacao.getId());
+    }
 
     public Meta salvar(Meta meta){
-        CategoriaTransacao categoriaTransacao = categoriaTransacaoRepository.findByDescricao(meta.getCategoriaTransacao());
-        meta.setIdCategoriaTransacao(categoriaTransacao.getId());
-
+        preencherCategoria(meta);
         try {
             return metaRepository.save(meta);
-        }
-        catch(Exception e) {
+        } catch(Exception e) {
             throw new SalvarMetaException();
         }
     }
 
-    public List<Meta> salvarTodos(List<Meta> metaList){
+    public List<Meta> salvarTodos(List<Meta> metas){
 
-        for(Meta meta: metaList){
-            CategoriaTransacao categoriaTransacao = categoriaTransacaoRepository.findByDescricao(meta.getCategoriaTransacao());
-            meta.setIdCategoriaTransacao(categoriaTransacao.getId());
+        for(Meta meta: metas){
+            preencherCategoria(meta);
         }
 
         try {
-            return metaRepository.saveAll(metaList);
+            return metaRepository.saveAll(metas);
         }
         catch(Exception e) {
             throw new SalvarMetaException();
@@ -56,23 +59,26 @@ public class MetaService {
     }
 
     public List<Meta> buscarTodosMesAno(String idUsuario, Integer mes, Integer ano){
-        List<Meta> metaList = metaRepository.buscarMetasComCategoria(idUsuario);
+        List<Meta> metas = metaRepository.buscarMetasComCategoria(idUsuario);
 
-        for (Meta meta : metaList) {
+        for (Meta meta : metas) {
             String idCategoriaMeta = meta.getIdCategoriaTransacao();
 
-            List<Transacao> transacaoList = transacaoRepository.buscarTransacoesComCategoriaMesAno(idUsuario, idCategoriaMeta, mes, ano);
+            List<Transacao> transacoes = transacaoRepository.buscarTransacoesComCategoriaMesAno(idUsuario, idCategoriaMeta, mes, ano);
 
-            BigDecimal total = transacaoList.stream()
+            BigDecimal total = transacoes.stream()
                     .map(Transacao::getValor)
                     .reduce(BigDecimal.ZERO, BigDecimal::add);
 
             meta.setGastoAtual(total);
         }
-        return metaList;
+        return metas;
     }
 
     public void deletar(String id){
+        if (!metaRepository.existsById(id)) {
+            throw new DeleteMetaException();
+        }
        metaRepository.deleteById(id);
     }
 

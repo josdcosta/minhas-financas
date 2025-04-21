@@ -7,6 +7,9 @@ import br.com.dominio.minhasfinancas.api.meta.response.CriarMetaResponse;
 import br.com.dominio.minhasfinancas.domain.Meta;
 import br.com.dominio.minhasfinancas.mapper.MetaMapper;
 import br.com.dominio.minhasfinancas.service.MetaService;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotNull;
+import org.junit.platform.commons.function.Try;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -28,59 +31,65 @@ public class MetaController {
 
     @PostMapping
     public ResponseEntity<?> criar(
-            @RequestBody CriarMetaRequest metaRequest,
+            @RequestBody @Valid CriarMetaRequest metaRequest,
             @AuthenticationPrincipal Jwt jwt){
         String idUsuario = jwt.getSubject();
         Meta meta = metaMapper.fromToMeta(metaRequest);
         meta.setIdUsuario(idUsuario);
-        CriarMetaResponse criarMetaResponse = metaMapper.fromToCriarMetaResponse(metaService.salvar(meta));
-        return new ResponseEntity<>(criarMetaResponse, HttpStatus.CREATED);
+        try {
+            Meta metaSalva = metaService.salvar(meta);
+            CriarMetaResponse metaResponse = metaMapper.fromToCriarMetaResponse(metaSalva);
+            return new ResponseEntity<>(metaResponse, HttpStatus.CREATED);
+        } catch (Exception e){
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Meta já existente");
+        }
     }
 
     @PostMapping("/lote")
     public ResponseEntity<?> criarMultiplas(
-            @RequestBody List<CriarMetaRequest> criarMetaRequestListList,
+            @RequestBody @Valid List<CriarMetaRequest> criarMetaRequestListList,
             @AuthenticationPrincipal Jwt jwt) {
         String idUsuario = jwt.getSubject();
-        List<Meta> metaList = metaMapper.fromToMetaList(criarMetaRequestListList);
-        metaList.stream().forEach(m -> m.setIdUsuario(idUsuario));
-        List<CriarMetaResponse> criarMetaResponseList = metaMapper.fromToCriarMetaResponseList(metaService.salvarTodos(metaList));
-        return new ResponseEntity<>(criarMetaResponseList, HttpStatus.CREATED);
-
+        List<Meta> metas = metaMapper.fromToMetaList(criarMetaRequestListList);
+        metas.forEach(m -> m.setIdUsuario(idUsuario));
+        try {
+            List<Meta> metasCriadas = metaService.salvarTodos(metas);
+            List<CriarMetaResponse> metasResponse = metaMapper.fromToCriarMetaResponseList(metasCriadas);
+            return new ResponseEntity<>(metasResponse, HttpStatus.CREATED);
+        } catch (Exception e){
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Alguma das metas enviadas já existe no banco");
+        }
     }
 
     @GetMapping("/{mes}/{ano}")
     public ResponseEntity<?> listaMetas(
-            @PathVariable Integer mes,
-            @PathVariable Integer ano,
+            @PathVariable @NotNull Integer mes,
+            @PathVariable @NotNull Integer ano,
             @AuthenticationPrincipal Jwt jwt){
         String idUsuario = jwt.getSubject();
-
-        List<Meta> metaList = metaService.buscarTodosMesAno(idUsuario, mes, ano);
-
-        List<BuscarMetaResponse> metasResponseList = metaMapper.fromtoBuscarMetaResponseList(metaList);
-
-        return new ResponseEntity<>(metasResponseList, HttpStatus.OK);
+        List<Meta> metasBuscadas = metaService.buscarTodosMesAno(idUsuario, mes, ano);
+        List<BuscarMetaResponse> metasResponse = metaMapper.fromtoBuscarMetaResponseList(metasBuscadas);
+        return new ResponseEntity<>(metasResponse, HttpStatus.OK);
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<?> deletar(
-            @PathVariable String id,
+            @PathVariable @NotNull String id,
             @AuthenticationPrincipal Jwt jwt){
         try {
             metaService.deletar(id);
             return ResponseEntity.status(HttpStatus.NO_CONTENT).body("Deletado com sucesso.");
         } catch (Exception e){
-            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
     }
 
     @PatchMapping
     public ResponseEntity<?> atualizarParcial(
-            @RequestBody AtualizarParcialMetaRequest atualizarParcialMetaRequest,
+            @RequestBody @Valid AtualizarParcialMetaRequest atualizarParcialMetaRequest,
             @AuthenticationPrincipal Jwt jwt
     ){
-        Meta meta = metaMapper.fromToMeta(atualizarParcialMetaRequest);
-        return new ResponseEntity<>(metaService.atualizarParcial(meta), HttpStatus.OK);
+        Meta metaAtualizada = metaMapper.fromToMeta(atualizarParcialMetaRequest);
+        return new ResponseEntity<>(metaService.atualizarParcial(metaAtualizada), HttpStatus.OK);
     }
 }

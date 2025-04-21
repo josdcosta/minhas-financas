@@ -8,7 +8,7 @@ import org.springframework.data.mongodb.core.index.Indexed;
 
 @Builder
 @Data
-@Document(collection = "categoria_gastos")
+@Document(collection = "categoria_transacoes")
 public class CategoriaTransacao {
     @Id
     private String id;

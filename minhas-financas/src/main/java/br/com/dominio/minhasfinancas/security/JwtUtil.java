@@ -22,7 +22,7 @@ public class JwtUtil {
                 .setSubject(id)
                 .claim("roles", roles)
                 .setIssuedAt(new Date())
-                .setExpiration(new Date(System.currentTimeMillis() + 1000 * 60 * 60)) // 1h
+                //.setExpiration(new Date(System.currentTimeMillis() + 1000 * 60 * 60)) // 1h
                 .signWith(Keys.hmacShaKeyFor(secret.getBytes()), SignatureAlgorithm.HS256)
                 .compact();
     }

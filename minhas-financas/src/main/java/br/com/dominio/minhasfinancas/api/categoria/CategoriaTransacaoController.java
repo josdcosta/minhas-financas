@@ -1,6 +1,7 @@
 package br.com.dominio.minhasfinancas.api.categoria;
 import br.com.dominio.minhasfinancas.api.categoria.request.AtualizarDescricaoCategoriaTransacaoRequest;
 import br.com.dominio.minhasfinancas.api.categoria.request.CriarCategoriaTransacaoRequest;
+import br.com.dominio.minhasfinancas.api.categoria.response.CriarCategoriaTransacaoResponse;
 import br.com.dominio.minhasfinancas.domain.CategoriaTransacao;
 import br.com.dominio.minhasfinancas.mapper.CategoriaTransacaoMapper;
 import br.com.dominio.minhasfinancas.service.CategoriaTransacaoService;
@@ -23,28 +24,55 @@ public class CategoriaTransacaoController {
     CategoriaTransacaoService categoriaTransacaoService;
 
     @PostMapping
-    public ResponseEntity<List<?>> criarTodos(@RequestBody @Valid List<CriarCategoriaTransacaoRequest> criarCategoriaGastoRequestList){
-
-        List<CategoriaTransacao> categoriaTransacaoList = categoriaTransacaoService.criarTodos(categoriaTransacaoMapper.fromToCategoriaTransacaoList(criarCategoriaGastoRequestList));
-        return new ResponseEntity<>(categoriaTransacaoMapper.fromToCriarCategoriaTransacaoResponseList(categoriaTransacaoList), HttpStatus.CREATED);
+    public ResponseEntity<?> criar(CriarCategoriaTransacaoRequest criarCategoriaTransacaoRequest){
+        CategoriaTransacao categoriaTransacao = categoriaTransacaoMapper.fromToCategoriaTransacao(criarCategoriaTransacaoRequest);
+        CategoriaTransacao categoriaTransacaoSalva = categoriaTransacaoService.criar(categoriaTransacao);
+        CriarCategoriaTransacaoResponse categoriaTransacaoResponse = categoriaTransacaoMapper.fromToCriarCategoriaTransacaoResponse(categoriaTransacaoSalva);
+        return new ResponseEntity<>(categoriaTransacaoResponse, HttpStatus.CREATED);
     }
+
+    @PostMapping("/lote")
+    public ResponseEntity<List<?>> criarTodos(
+            @RequestBody @Valid List<CriarCategoriaTransacaoRequest> criarCategoriaGastoRequestList
+    ) {
+        List<CategoriaTransacao> categorias = categoriaTransacaoMapper
+                .fromToCategoriaTransacaoList(criarCategoriaGastoRequestList);
+
+        List<CategoriaTransacao> categoriasCriadas = categoriaTransacaoService
+                .criarTodos(categorias);
+
+        List<CriarCategoriaTransacaoResponse> categoriasResponse = categoriaTransacaoMapper
+                .fromToCriarCategoriaTransacaoResponseList(categoriasCriadas);
+
+        return new ResponseEntity<>(categoriasResponse, HttpStatus.CREATED);
+    }
+
 
     @GetMapping
     public List<CategoriaTransacao> buscarTodos(){
         return categoriaTransacaoService.buscarTodos();
     }
 
-    @DeleteMapping("{idCategoria}")
-    public void deletar(
-            @PathVariable String idCategoria){
-        categoriaTransacaoService.deletar(idCategoria);
+    @DeleteMapping("{id}")
+    public ResponseEntity<?> deletar(
+            @PathVariable String id){
+        try{
+            categoriaTransacaoService.deletar(id);
+            return ResponseEntity.status(HttpStatus.NO_CONTENT).body("Excluído com sucesso!");
+        } catch (Exception e){
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Id não encontrado.");
+        }
     }
 
     @PatchMapping
     public CategoriaTransacao atualizarDescricao(
-            @RequestBody AtualizarDescricaoCategoriaTransacaoRequest atualizarDescricaoCategoriaTransacaoRequest){
-        CategoriaTransacao categoriaTransacao = categoriaTransacaoMapper.
-                fromToCategoriaTransacao(atualizarDescricaoCategoriaTransacaoRequest);
-        return categoriaTransacaoService.atualizarDescricao(categoriaTransacao);
+            @RequestBody @Valid AtualizarDescricaoCategoriaTransacaoRequest request
+    ) {
+        CategoriaTransacao categoriaTransacao = categoriaTransacaoMapper
+                .fromToCategoriaTransacao(request);
+
+        return categoriaTransacaoService
+                .atualizarDescricao(categoriaTransacao);
     }
+
 }

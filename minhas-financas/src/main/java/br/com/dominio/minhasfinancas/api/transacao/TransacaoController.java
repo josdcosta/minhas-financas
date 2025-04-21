@@ -9,6 +9,7 @@ import br.com.dominio.minhasfinancas.exception.TransacoesNaoEncontradasException
 import br.com.dominio.minhasfinancas.mapper.TransacaoMapper;
 import br.com.dominio.minhasfinancas.service.CategorizarAIService;
 import br.com.dominio.minhasfinancas.service.TransacaoService;
+import jakarta.validation.Valid;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -37,7 +38,7 @@ public class TransacaoController {
 
     @PostMapping
     public ResponseEntity<?> salvarTransacoes(
-            @RequestBody List<CriarTransacaoRequest> criarTransacaoRequestList,
+            @RequestBody @Valid List<CriarTransacaoRequest> criarTransacaoRequestList,
             @AuthenticationPrincipal Jwt jwt) {
 
         List<Transacao> transacaoList = transacaoMapper.fromToTransacaoList(criarTransacaoRequestList);

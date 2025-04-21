@@ -10,6 +10,6 @@ public class CriarCategoriaTransacaoRequest {
     @NotBlank(message = "descricao não pode ser em branco")
     private String descricao;
 
-    @NotNull(message = "tipo não pode ser nulo")
+    @NotNull(message = "NaturezaRecurso não pode ser nulo")
     private NaturezaRecurso tipo;
 }
