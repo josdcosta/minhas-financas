@@ -1,2 +1,4 @@
 **/build/
 **/application.properties
+**/.gradle/
+**/.idea/
