@@ -37,6 +37,7 @@ public class Usuario {
     @Transient
     private String token;
 
+    @Builder.Default
     @NotNull(message = "roles não pode ser nulo")
     private List<String> roles = new ArrayList<>();
 }
