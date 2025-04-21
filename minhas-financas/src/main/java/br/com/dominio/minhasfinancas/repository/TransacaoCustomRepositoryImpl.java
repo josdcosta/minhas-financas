@@ -35,7 +35,7 @@ public class TransacaoCustomRepositoryImpl implements TransacaoCustomRepository 
         // Monta a query com os filtros
         Criteria criteria = Criteria.where("idUsuario").is(idUsuario)
                 .and("data").gte(dataInicio).lte(dataFim)
-                .and("idCdeletarategoriaTransacao").is(idCategoriaTransacao)
+                .and("idCategoriaTransacao").is(idCategoriaTransacao)
                 ;
 
         Query query = new Query(criteria);

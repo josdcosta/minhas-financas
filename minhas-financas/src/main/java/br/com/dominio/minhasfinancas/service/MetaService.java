@@ -3,7 +3,6 @@ package br.com.dominio.minhasfinancas.service;
 import br.com.dominio.minhasfinancas.domain.CategoriaTransacao;
 import br.com.dominio.minhasfinancas.domain.Meta;
 import br.com.dominio.minhasfinancas.domain.Transacao;
-import br.com.dominio.minhasfinancas.exception.CategoriaNaoEncontradaException;
 import br.com.dominio.minhasfinancas.exception.SalvarMetaException;
 import br.com.dominio.minhasfinancas.repository.CategoriaTransacaoRepository;
 import br.com.dominio.minhasfinancas.repository.MetaRepository;
@@ -41,7 +40,22 @@ public class MetaService {
         }
     }
 
-    public List<Meta> BuscarTodos(String idUsuario, Integer mes, Integer ano){
+    public List<Meta> salvarTodos(List<Meta> metaList){
+
+        for(Meta meta: metaList){
+            CategoriaTransacao categoriaTransacao = categoriaTransacaoRepository.findByDescricao(meta.getCategoriaTransacao());
+            meta.setIdCategoriaTransacao(categoriaTransacao.getId());
+        }
+
+        try {
+            return metaRepository.saveAll(metaList);
+        }
+        catch(Exception e) {
+            throw new SalvarMetaException();
+        }
+    }
+
+    public List<Meta> buscarTodosMesAno(String idUsuario, Integer mes, Integer ano){
         List<Meta> metaList = metaRepository.buscarMetasComCategoria(idUsuario);
 
         for (Meta meta : metaList) {

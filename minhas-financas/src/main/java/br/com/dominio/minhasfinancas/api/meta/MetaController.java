@@ -2,7 +2,7 @@ package br.com.dominio.minhasfinancas.api.meta;
 
 import br.com.dominio.minhasfinancas.api.meta.request.AtualizarParcialMetaRequest;
 import br.com.dominio.minhasfinancas.api.meta.request.CriarMetaRequest;
-import br.com.dominio.minhasfinancas.api.meta.response.BuscarMetasResponse;
+import br.com.dominio.minhasfinancas.api.meta.response.BuscarMetaResponse;
 import br.com.dominio.minhasfinancas.api.meta.response.CriarMetaResponse;
 import br.com.dominio.minhasfinancas.domain.Meta;
 import br.com.dominio.minhasfinancas.mapper.MetaMapper;
@@ -37,6 +37,18 @@ public class MetaController {
         return new ResponseEntity<>(criarMetaResponse, HttpStatus.CREATED);
     }
 
+    @PostMapping("/lote")
+    public ResponseEntity<?> criarMultiplas(
+            @RequestBody List<CriarMetaRequest> criarMetaRequestListList,
+            @AuthenticationPrincipal Jwt jwt) {
+        String idUsuario = jwt.getSubject();
+        List<Meta> metaList = metaMapper.fromToMetaList(criarMetaRequestListList);
+        metaList.stream().forEach(m -> m.setIdUsuario(idUsuario));
+        List<CriarMetaResponse> criarMetaResponseList = metaMapper.fromToCriarMetaResponseList(metaService.salvarTodos(metaList));
+        return new ResponseEntity<>(criarMetaResponseList, HttpStatus.CREATED);
+
+    }
+
     @GetMapping("/{mes}/{ano}")
     public ResponseEntity<?> listaMetas(
             @PathVariable Integer mes,
@@ -44,9 +56,9 @@ public class MetaController {
             @AuthenticationPrincipal Jwt jwt){
         String idUsuario = jwt.getSubject();
 
-        List<Meta> metaList = metaService.BuscarTodos(idUsuario, mes, ano);
+        List<Meta> metaList = metaService.buscarTodosMesAno(idUsuario, mes, ano);
 
-        List<BuscarMetasResponse> metasResponseList = metaMapper.fromtoBuscarMetaResponseList(metaList);
+        List<BuscarMetaResponse> metasResponseList = metaMapper.fromtoBuscarMetaResponseList(metaList);
 
         return new ResponseEntity<>(metasResponseList, HttpStatus.OK);
     }

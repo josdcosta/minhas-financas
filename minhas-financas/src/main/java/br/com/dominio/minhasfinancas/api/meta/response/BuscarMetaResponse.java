@@ -8,7 +8,7 @@ import java.math.BigDecimal;
 
 @Builder
 @Data
-public class BuscarMetasResponse {
+public class BuscarMetaResponse {
     private String id;
     private String descricao;
     private String categoriaTransacao;

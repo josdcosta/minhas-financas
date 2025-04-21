@@ -2,12 +2,11 @@ package br.com.dominio.minhasfinancas.mapper;
 
 import br.com.dominio.minhasfinancas.api.meta.request.AtualizarParcialMetaRequest;
 import br.com.dominio.minhasfinancas.api.meta.request.CriarMetaRequest;
-import br.com.dominio.minhasfinancas.api.meta.response.BuscarMetasResponse;
+import br.com.dominio.minhasfinancas.api.meta.response.BuscarMetaResponse;
 import br.com.dominio.minhasfinancas.api.meta.response.CriarMetaResponse;
 import br.com.dominio.minhasfinancas.domain.Meta;
 import org.springframework.stereotype.Component;
 
-import java.math.BigDecimal;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -28,8 +27,8 @@ public class MetaMapper {
                 .build();
     }
 
-    public BuscarMetasResponse fromtoMetaResponseList(Meta meta){
-        return BuscarMetasResponse.builder()
+    public BuscarMetaResponse fromToBuscarMetaResponse(Meta meta){
+        return BuscarMetaResponse.builder()
                 .id(meta.getId())
                 .descricao(meta.getDescricao())
                 .categoriaTransacao(meta.getCategoriaTransacao())
@@ -38,9 +37,18 @@ public class MetaMapper {
                 .build();
     }
 
-    public List<BuscarMetasResponse> fromtoBuscarMetaResponseList(List<Meta> metaList){
-        return metaList.stream().map(this::fromtoMetaResponseList).collect(Collectors.toList());
+    public List<BuscarMetaResponse> fromtoBuscarMetaResponseList(List<Meta> metaList){
+        return metaList.stream().map(this::fromToBuscarMetaResponse).collect(Collectors.toList());
     }
+
+    public List<Meta> fromToMetaList(List<CriarMetaRequest> criarMetaRequestList){
+        return criarMetaRequestList.stream().map(this::fromToMeta).collect(Collectors.toList());
+    }
+
+    public List<CriarMetaResponse> fromToCriarMetaResponseList(List<Meta> metaList){
+        return metaList.stream().map(this::fromToCriarMetaResponse).collect(Collectors.toList());
+    }
+
 
     public Meta fromToMeta(AtualizarParcialMetaRequest atualizarParcialMetaRequest){
         return Meta.builder()
