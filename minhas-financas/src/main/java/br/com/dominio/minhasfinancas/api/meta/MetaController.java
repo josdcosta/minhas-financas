@@ -84,12 +84,15 @@ public class MetaController {
         }
     }
 
-    @PatchMapping
+    @PatchMapping("{id}")
     public ResponseEntity<?> atualizarParcial(
+            @PathVariable String id,
             @RequestBody @Valid AtualizarParcialMetaRequest atualizarParcialMetaRequest,
             @AuthenticationPrincipal Jwt jwt
     ){
-        Meta metaAtualizada = metaMapper.fromToMeta(atualizarParcialMetaRequest);
-        return new ResponseEntity<>(metaService.atualizarParcial(metaAtualizada), HttpStatus.OK);
+        Meta meta = metaMapper.fromToMeta(atualizarParcialMetaRequest);
+        meta.setId(id);
+        metaService.atualizarParcial(meta);
+        return ResponseEntity.status(HttpStatus.NO_CONTENT).body("Atualizado com sucesso.");
     }
 }

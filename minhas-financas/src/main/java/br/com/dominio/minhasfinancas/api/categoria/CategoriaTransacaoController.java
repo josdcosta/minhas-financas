@@ -64,15 +64,18 @@ public class CategoriaTransacaoController {
         }
     }
 
-    @PatchMapping
-    public CategoriaTransacao atualizarDescricao(
-            @RequestBody @Valid AtualizarDescricaoCategoriaTransacaoRequest request
+    @PatchMapping("{id}")
+    public ResponseEntity<?> atualizarDescricao(
+            @PathVariable String id,
+            @RequestBody @Valid AtualizarDescricaoCategoriaTransacaoRequest atualizarDescricaoCategoriaTransacaoRequest
     ) {
         CategoriaTransacao categoriaTransacao = categoriaTransacaoMapper
-                .fromToCategoriaTransacao(request);
+                .fromToCategoriaTransacao(atualizarDescricaoCategoriaTransacaoRequest);
 
-        return categoriaTransacaoService
+        categoriaTransacao.setId(id);
+        categoriaTransacaoService
                 .atualizarDescricao(categoriaTransacao);
+        return ResponseEntity.status(HttpStatus.NO_CONTENT).body("Atualizado com sucesso.");
     }
 
 }
